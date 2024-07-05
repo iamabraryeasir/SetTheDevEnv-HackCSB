@@ -202,7 +202,7 @@ def main():
                                    font=('Poppins Semibold', 25))
     c_windows_label.pack(pady=30)
     c_windows_instruction = ctk.CTkLabel(master=frames['c_windows_frame'],
-                                         text="Work Need To Be Done: \n1. Install Visual Studio \n2. Download MinGW using MSYS2 \n3. Add gcc and g++ to path. \n4. Install necessary extensions for VSCode. ",
+                                         text="Work Need To Be Done: \n1. Install Visual Studio \n2. Download GCC and G++ using MSYS2 \n3. Add GCC and G++ to path. \n4. Install necessary extensions for VSCode. ",
                                          font=('Poppins', 15))
     c_windows_instruction.pack()
 
@@ -227,7 +227,7 @@ def main():
         download_button.pack_forget()  # Hide download button
         install_button.pack(pady=20)  # Show install button
 
-    download_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Start Download', width=200,
+    download_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Download VSCode', width=200,
                                     height=50, corner_radius=7, font=('Poppins', 18), command=start_download_vscode)
     download_button.pack(pady=20)
 
