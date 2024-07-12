@@ -7,6 +7,7 @@ import subprocess
 language = ''
 system_name = ''
 vscode_windows_url = 'https://vscode.download.prss.microsoft.com/dbazure/download/stable/ea1445cc7016315d0f5728f8e8b12a45dc0a7286/VSCodeUserSetup-x64-1.91.0.exe'
+msys2_windows_url = 'https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe'
 downloaded_file_path = ''
 
 # ***************************** <ctk settings> *****************************
@@ -26,9 +27,8 @@ app.iconbitmap('')
 def create_frames(app):
     frames = {}
     frame_names = [
-        'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'c_macos_frame', 'c_linux_frame',
-        'java_windows_frame', 'java_macos_frame', 'java_linux_frame', 'python_windows_frame', 'python_macos_frame',
-        'python_linux_frame', 'others_windows_frame', 'others_macos_frame', 'others_linux_frame', 'download_vscode_for_windows_frame'
+        'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'coming_soon_frame', 'download_vscode_for_windows_frame',
+        'download_msys2_for_windows_frame', 'coming_soon_os_frame'
     ]
     for name in frame_names:
         frames[name] = ctk.CTkFrame(master=app)
@@ -84,8 +84,28 @@ def install_vscode():
     if downloaded_file_path:
         try:
             subprocess.run([downloaded_file_path], check=True)
+            install_button.configure(text='Next', command=show_download_msys2_page)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to install VSCode: {e}")
+
+# Function to show the MSYS2 download page
+def show_download_msys2_page():
+    frames['download_vscode_for_windows_frame'].pack_forget()
+    frames['download_msys2_for_windows_frame'].pack(fill="both", expand=True)
+
+# Function to download MSYS2
+def download_msys2():
+    download_file(msys2_windows_url, progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label, cur, tot))
+    msys2_download_button.pack_forget()
+    msys2_install_button.pack(pady=20)
+
+# Function to install MSYS2
+def install_msys2():
+    if downloaded_file_path:
+        subprocess.run([downloaded_file_path], check=True, capture_output=True, text=True)
+        msys2_install_button.configure(text='Done')
+
+
 
 # ***************************** <defining main method> *****************************
 
@@ -117,20 +137,10 @@ def main():
         language = 'c'
         show_os_selector_page()
 
-    def java_btn_click():
-        global language
-        language = 'java'
-        show_os_selector_page()
-
-    def python_btn_click():
-        global language
-        language = 'python'
-        show_os_selector_page()
-
-    def others_btn_click():
-        global language
-        language = 'others'
-        show_os_selector_page()
+    def show_coming_soon_frame():
+        for frame in frames:
+            frames[frame].pack_forget()
+        frames['coming_soon_frame'].pack(fill="both", expand=True)
 
     window_title = ctk.CTkLabel(master=frames['language_select_frame'], text="Select Your Programming Language.",
                                 font=('Poppins Semibold', 25))
@@ -139,11 +149,11 @@ def main():
     c_and_cpp_btn = ctk.CTkButton(master=frames['language_select_frame'], text='C/C++', width=140, height=45, corner_radius=7,
                                   font=('Poppins', 17), command=c_and_cpp_btn_click)
     java_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Java', width=140, height=45, corner_radius=7,
-                             font=('Poppins', 17), command=java_btn_click)
+                             font=('Poppins', 17), command=show_coming_soon_frame)
     python_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Python', width=140, height=45, corner_radius=7,
-                               font=('Poppins', 17), command=python_btn_click)
+                               font=('Poppins', 17), command=show_coming_soon_frame)
     others_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Others', width=140, height=45, corner_radius=7,
-                               font=('Poppins', 17), command=others_btn_click)
+                               font=('Poppins', 17), command=show_coming_soon_frame)
 
     c_and_cpp_btn.grid(row=1, column=1, pady=20)
     java_btn.grid(row=1, column=2, pady=20)
@@ -162,15 +172,19 @@ def main():
         system_name = 'windows'
         decision_maker(language, system_name)
 
-    def macos_button_click():
-        global system_name
-        system_name = 'macos'
-        decision_maker(language, system_name)
-
-    def linux_button_click():
-        global system_name
-        system_name = 'linux'
-        decision_maker(language, system_name)
+    # def macos_button_click():
+    #     global system_name
+    #     system_name = 'macos'
+    #     decision_maker(language, system_name)
+    #
+    # def linux_button_click():
+    #     global system_name
+    #     system_name = 'linux'
+    #     decision_maker(language, system_name)
+    def show_coming_soon_os_frame():
+        for frame in frames:
+            frames[frame].pack_forget()
+        frames['coming_soon_os_frame'].pack(fill="both", expand=True)
 
     basic_label = ctk.CTkLabel(master=frames['os_asker_frame'], text="What is Your Operating System?",
                                font=('Poppins Semibold', 25))  # Top title text
@@ -179,9 +193,9 @@ def main():
     windows_button = ctk.CTkButton(master=frames['os_asker_frame'], text='Windows', width=140, height=45, corner_radius=7,
                                    font=('Poppins', 17), command=windows_button_click)
     macos_button = ctk.CTkButton(master=frames['os_asker_frame'], text='macOS', width=140, height=45, corner_radius=7,
-                                 font=('Poppins', 17), command=macos_button_click)
+                                 font=('Poppins', 17), command=show_coming_soon_os_frame)
     linux_button = ctk.CTkButton(master=frames['os_asker_frame'], text='Linux', width=140, height=45, corner_radius=7,
-                                 font=('Poppins', 17), command=linux_button_click)
+                                 font=('Poppins', 17), command=show_coming_soon_os_frame)
 
     # Arrange buttons side by side using grid
     windows_button.grid(row=1, column=0, sticky="e")
@@ -227,13 +241,62 @@ def main():
         download_button.pack_forget()  # Hide download button
         install_button.pack(pady=20)  # Show install button
 
+    global install_button
+    install_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Install VSCode', width=200,
+                                   height=50, corner_radius=7, font=('Poppins', 18), command=install_vscode)
+    install_button.pack_forget()
+
     download_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Download VSCode', width=200,
                                     height=50, corner_radius=7, font=('Poppins', 18), command=start_download_vscode)
     download_button.pack(pady=20)
 
-    install_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Install VSCode', width=200,
-                                   height=50, corner_radius=7, font=('Poppins', 18), command=install_vscode)
-    install_button.pack_forget()
+    # ***************************** <download msys2 for windows frame> *****************************
+    download_label = ctk.CTkLabel(master=frames['download_msys2_for_windows_frame'],
+                                  text="Download MSYS2 for Windows",
+                                  font=('Poppins Semibold', 25))
+    download_label.pack(pady=20)
+
+    global msys2_progress_bar, msys2_percentage_label, msys2_download_button, msys2_install_button
+
+    msys2_progress_bar = ttk.Progressbar(frames['download_msys2_for_windows_frame'], length=300, mode='determinate')
+    msys2_progress_bar.pack(pady=20)
+
+    msys2_percentage_label = ctk.CTkLabel(master=frames['download_msys2_for_windows_frame'], text="0%", font=('Poppins', 14))
+    msys2_percentage_label.pack()
+
+    msys2_download_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Download MSYS2', width=200,
+                                         height=50, corner_radius=7, font=('Poppins', 18), command=download_msys2)
+    msys2_download_button.pack(pady=20)
+
+    msys2_install_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Install MSYS2', width=200,
+                                        height=50, corner_radius=7, font=('Poppins', 18), command=install_msys2)
+    msys2_install_button.pack_forget()
+
+    # Return Back Frame
+    def return_back():
+        for frame in frames.values():
+            frame.pack_forget()
+        frames['language_select_frame'].pack(fill="both", expand=True)
+
+    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_frame'], text="Coming Soon", font=('Poppins Semibold', 25))
+    coming_soon_label.pack(pady=50)
+
+    return_button = ctk.CTkButton(master=frames['coming_soon_frame'], text='Return Back', width=180, height=45, corner_radius=7,
+                                          font=('Poppins', 17), command=return_back)
+    return_button.pack(pady=20)
+
+    # Return Back Frame Language
+    def return_back_os():
+        for frame in frames.values():
+            frame.pack_forget()
+        frames['os_asker_frame'].pack(fill="both", expand=True)
+
+    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_os_frame'], text="Coming Soon", font=('Poppins Semibold', 25))
+    coming_soon_label.pack(pady=50)
+
+    return_button = ctk.CTkButton(master=frames['coming_soon_os_frame'], text='Return Back', width=180, height=45, corner_radius=7,
+                                          font=('Poppins', 17), command=return_back_os)
+    return_button.pack(pady=20)
 
 if __name__ == "__main__":
     main()
