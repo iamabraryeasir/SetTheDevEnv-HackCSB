@@ -1,3 +1,4 @@
+import pyperclip
 import customtkinter as ctk
 import requests
 from tkinter import ttk, messagebox
@@ -36,6 +37,7 @@ def create_frames(app):
 
 # Creating Frames.
 frames = create_frames(app)
+install_mingw64_frame = ctk.CTkFrame(master=frames['install_mingw64_frame'], fg_color='transparent')
 
 # ***************************** <defining all methods> *****************************
 def decision_maker(language, system_name):  # method to take decision
@@ -97,9 +99,8 @@ def show_download_msys2_page():
 def download_msys2():
     download_file(msys2_windows_url, progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label, cur, tot))
     msys2_download_button.pack_forget()
-    msys2_install_button.pack(pady=20)
+    msys2_install_button.pack(pady=20)  # Show the installation button
 
-# Function to install MSYS2
 def install_msys2():
     def show_install_mingw64_frame():
         frames['install_mingw64_frame'].pack(fill="both", expand=True)
@@ -108,6 +109,8 @@ def install_msys2():
     if downloaded_file_path:
         subprocess.run([downloaded_file_path])
         msys2_install_button.configure(text='Goto Next Step', command=show_install_mingw64_frame)
+
+
 
 
 # ***************************** <defining main method> *****************************
@@ -278,30 +281,36 @@ def main():
     # ***************************** <install mingw64 frame> *****************************
 
     def copy_command():
-        command_text_box.get(0.0, 'end')
+        command = "pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain"
+        pyperclip.copy(command)
 
     def run_terminal():
         subprocess.run(['C:\\msys64\\ucrt64.exe'])
 
-    msys2_install_button.configure(text='Goto Next Step')
-
-    install_mingw64_label = ctk.CTkLabel(master=frames['install_mingw64_frame'],
-                                         text="Copy The Following Command and Run The Terminal",
+    install_mingw64_label = ctk.CTkLabel(master=install_mingw64_frame,
+                                         text="Run the Following Command on Run The Terminal",
                                          font=('Poppins Semibold', 20))
     install_mingw64_label.pack(pady=25)
 
-    command_text_box = ctk.CTkTextbox(frames['install_mingw64_frame'],width=200, height=50, activate_scrollbars=False, wrap='none')
-    command_text_box.configure(state="disabled")
-    command_text_box.insert("0.0", "pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain")
-    command_text_box.pack(pady=20)
+    copy_command_label = ctk.CTkLabel(master=install_mingw64_frame,
+                                      text="1. Copy the command by clicking on the copy command button.",
+                                      font=('Poppins', 15))
+    copy_command_label.pack()
 
-    command_copy_button = ctk.CTkButton(master=frames['install_mingw64_frame'], text="Copy Command", width=200,
+    command_copy_button = ctk.CTkButton(master=install_mingw64_frame, text="Copy Command", width=200,
                                         height=50, corner_radius=7, font=('Poppins', 18), command=copy_command)
     command_copy_button.pack(pady=20)
 
-    run_msys2_terminal = ctk.CTkButton(master=frames['install_mingw64_frame'], text="Install Mingw-64", width=200,
+    run_terminal_label = ctk.CTkLabel(master=install_mingw64_frame,
+                                      text="2. Hit the run terminal button and paste the command \nand hit enter 2 times when asked",
+                                      font=('Poppins', 15))
+    run_terminal_label.pack()
+
+    run_msys2_terminal = ctk.CTkButton(master=install_mingw64_frame, text="Run Terminal", width=200,
                                        height=50, corner_radius=7, font=('Poppins', 18), command=run_terminal)
     run_msys2_terminal.pack(pady=20)
+
+    install_mingw64_frame.pack(pady=20)
 
     # Return Back Frame
     def return_back():
