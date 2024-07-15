@@ -1,14 +1,18 @@
+import os
+import threading
 import pyperclip
 import customtkinter as ctk
 import requests
 from tkinter import ttk, messagebox
 import subprocess
 
+
 # ***************************** <defining all global variables> *****************************
 language = ''
 system_name = ''
 vscode_windows_url = 'https://vscode.download.prss.microsoft.com/dbazure/download/stable/ea1445cc7016315d0f5728f8e8b12a45dc0a7286/VSCodeUserSetup-x64-1.91.0.exe'
 msys2_windows_url = 'https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe'
+path_to_add_to_environment_variable = r"C:\msys64\ucrt64\bin"
 downloaded_file_path = ''
 
 # ***************************** <ctk settings> *****************************
@@ -21,7 +25,7 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 app = ctk.CTk()  # create CTk window like you do with the Tk window
 app.geometry("700x400")
 app.resizable(False, False)  # to make the window size fixed
-app.title("SetDevEnv - Abrar")
+app.title("SetTheDevEnv - Abrar Yeasir")
 app.iconbitmap('')
 
 # Function to create frames
@@ -29,7 +33,7 @@ def create_frames(app):
     frames = {}
     frame_names = [
         'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'coming_soon_frame', 'download_vscode_for_windows_frame',
-        'download_msys2_for_windows_frame', 'install_mingw64_frame', 'coming_soon_os_frame'
+        'download_msys2_for_windows_frame', 'install_mingw64_frame', 'add_to_path_and_install_extensions_frame', 'coming_soon_os_frame'
     ]
     for name in frame_names:
         frames[name] = ctk.CTkFrame(master=app)
@@ -95,12 +99,6 @@ def show_download_msys2_page():
     frames['download_vscode_for_windows_frame'].pack_forget()
     frames['download_msys2_for_windows_frame'].pack(fill="both", expand=True)
 
-# Function to download MSYS2
-def download_msys2():
-    download_file(msys2_windows_url, progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label, cur, tot))
-    msys2_download_button.pack_forget()
-    msys2_install_button.pack(pady=20)  # Show the installation button
-
 def install_msys2():
     def show_install_mingw64_frame():
         frames['install_mingw64_frame'].pack(fill="both", expand=True)
@@ -109,9 +107,6 @@ def install_msys2():
     if downloaded_file_path:
         subprocess.run([downloaded_file_path])
         msys2_install_button.configure(text='Goto Next Step', command=show_install_mingw64_frame)
-
-
-
 
 # ***************************** <defining main method> *****************************
 
@@ -243,7 +238,9 @@ def main():
     percentage_label.pack()
 
     def start_download_vscode():
+        download_button.configure(state="disabled")
         download_file(vscode_windows_url, progress_callback=lambda cur, tot: update_progress_bar(progress_bar, percentage_label, cur, tot))
+        download_button.configure(state="normal")
         download_button.pack_forget()  # Hide download button
         install_button.pack(pady=20)  # Show install button
 
@@ -262,6 +259,14 @@ def main():
                                   font=('Poppins Semibold', 25))
     download_label.pack(pady=20)
 
+    # Function to download MSYS2
+    def download_msys2():
+        msys2_download_button.configure(state="disabled")
+        download_file(msys2_windows_url, progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label, cur, tot))
+        msys2_download_button.configure(state="normal")
+        msys2_download_button.pack_forget()
+        msys2_install_button.pack(pady=20)
+
     global msys2_progress_bar, msys2_percentage_label, msys2_download_button, msys2_install_button
 
     msys2_progress_bar = ttk.Progressbar(frames['download_msys2_for_windows_frame'], length=300, mode='determinate')
@@ -279,13 +284,26 @@ def main():
     msys2_install_button.pack_forget()
 
     # ***************************** <install mingw64 frame> *****************************
-
     def copy_command():
         command = "pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain"
         pyperclip.copy(command)
 
+    def activate_button():
+        run_msys2_terminal.configure(text="Goto Next Step", state="normal")
+
+    # Function to switch to add_to_path_and_install_extensions_frame
     def run_terminal():
-        subprocess.run(['C:\\msys64\\ucrt64.exe'])
+        def switch_frame():
+            for frame in frames.values():
+                frame.pack_forget()
+            frames['add_to_path_and_install_extensions_frame'].pack(fill="both", expand=True)
+
+        if run_msys2_terminal.cget("text") == "Run Terminal":
+            subprocess.run(['C:\\msys64\\ucrt64.exe'])
+            run_msys2_terminal.configure(state="disabled")
+            threading.Timer(10, activate_button).start()
+        elif run_msys2_terminal.cget("text") == "Goto Next Step":
+            switch_frame()
 
     install_mingw64_label = ctk.CTkLabel(master=install_mingw64_frame,
                                          text="Run the Following Command on Run The Terminal",
@@ -311,6 +329,47 @@ def main():
     run_msys2_terminal.pack(pady=20)
 
     install_mingw64_frame.pack(pady=20)
+
+    # ***************************** <add to path and install extensions frame> *****************************
+    def add_to_user_path(new_path, add_to_path_btn):
+        # Retrieve the current PATH
+        current_path = os.environ.get('PATH')
+
+        # Check if the new_path is already in the PATH
+        if new_path in current_path:
+            add_to_path_btn.configure(text="Path is There", state="normal")
+            return
+
+        # Add the new_path to the PATH
+        updated_path = current_path + os.pathsep + new_path
+
+        # Set the updated PATH for the current process
+        os.environ['PATH'] = updated_path
+
+        # Update the user PATH environment variable permanently
+        subprocess.run(
+            ['setx', 'PATH', updated_path],
+            shell=True,
+            check=True
+        )
+        add_to_path_btn.configure(text="Path Added", state="normal")
+
+    page_label = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'],
+                              text="Let's do the next things",
+                              font=('Poppins', 25))
+    page_label.pack(pady=20)
+    page_label_2 = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'],
+                              text="1. Click the following button to the path.",
+                              font=('Poppins', 15))
+    page_label_2.pack(pady=15)
+
+    global add_to_path_btn
+    add_to_path_btn = ctk.CTkButton(master=frames['add_to_path_and_install_extensions_frame'], text="Add To Path",
+                                    width=200, height=50,
+                                    corner_radius=7, font=('Poppins', 18),
+                                    command=lambda: add_to_user_path(path_to_add_to_environment_variable,
+                                                                     add_to_path_btn))
+    add_to_path_btn.pack(pady=15)
 
     # Return Back Frame
     def return_back():
