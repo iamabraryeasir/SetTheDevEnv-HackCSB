@@ -34,7 +34,7 @@ def create_frames(app):
     frames = {}
     frame_names = [
         'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'coming_soon_frame',
-        'download_vscode_for_windows_frame',
+        'download_vscode_for_windows_frame', 'final_c_setup_frame',
         'download_msys2_for_windows_frame', 'install_mingw64_frame', 'add_to_path_and_install_extensions_frame',
         'coming_soon_os_frame'
     ]
@@ -397,12 +397,16 @@ def main():
         except FileNotFoundError:
             label.configure(text=ext + " ❌ (code.cmd not found)")
 
+    def show_final_c_setup_frame():
+        frames['add_to_path_and_install_extensions_frame'].pack_forget()
+        frames['final_c_setup_frame'].pack(fill="both", expand=True)
+
     def install_extensions():
         total = len(extension_list)
         for i, ext in enumerate(extension_list):
             install_extension(ext, extension_labels[i])
             extension_update_progress(i + 1, total)
-        install_button.configure(state="normal")
+        vsocde_extension_install_button.configure(state="normal", text="Goto Next Step", command=show_final_c_setup_frame)
 
     def start_installation():
         install_button.configure(state="disabled")
@@ -445,6 +449,34 @@ def main():
                                                     text="Install Extensions", width=200, height=50,
                                                     corner_radius=7, font=('Poppins', 18), command=start_installation)
     vsocde_extension_install_button.pack(pady=20)
+
+    # ***************************** <final c setup frame> *****************************
+    def create_and_open_file():
+        file_content = """
+#include <stdio.h>
+
+int main()
+{
+    printf("Happy, Hacking!!");
+    return 0;
+}
+"""
+        file_path = "hello.c"
+
+        with open(file_path, "w") as file:
+            file.write(file_content.strip())
+
+        # Update this path to the full path of the VSCode executable
+        vscode_path = "code"
+        os.system(f"code {file_path}")
+
+    final_frame_label = ctk.CTkLabel(master=frames['final_c_setup_frame'], text="Congratulation You Have Done It.🎉",
+                                     font=('Poppins', 30))
+    final_frame_label.pack(pady=25)
+    run_first_c_code_btn = ctk.CTkButton(master=frames['final_c_setup_frame'], text="Run Your First Code", width=200,
+                                         height=50,
+                                         corner_radius=7, font=('Poppins', 18), command=create_and_open_file)
+    run_first_c_code_btn.pack(pady=50)
 
     # Return Back Frame
     def return_back():
