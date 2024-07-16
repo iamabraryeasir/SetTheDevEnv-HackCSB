@@ -6,13 +6,13 @@ import requests
 from tkinter import ttk, messagebox
 import subprocess
 
-
 # ***************************** <defining all global variables> *****************************
 language = ''
 system_name = ''
 vscode_windows_url = 'https://vscode.download.prss.microsoft.com/dbazure/download/stable/ea1445cc7016315d0f5728f8e8b12a45dc0a7286/VSCodeUserSetup-x64-1.91.0.exe'
 msys2_windows_url = 'https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe'
 path_to_add_to_environment_variable = r"C:\msys64\ucrt64\bin"
+extension_list = ["ms-vscode.cpptools", "formulahendry.code-runner", "sumitsaha.learn-with-sumit-theme"]
 downloaded_file_path = ''
 
 # ***************************** <ctk settings> *****************************
@@ -23,25 +23,30 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 # defining the app object for customtkinter
 app = ctk.CTk()  # create CTk window like you do with the Tk window
-app.geometry("700x400")
+app.geometry("700x550")
 app.resizable(False, False)  # to make the window size fixed
 app.title("SetTheDevEnv - Abrar Yeasir")
 app.iconbitmap('')
+
 
 # Function to create frames
 def create_frames(app):
     frames = {}
     frame_names = [
-        'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'coming_soon_frame', 'download_vscode_for_windows_frame',
-        'download_msys2_for_windows_frame', 'install_mingw64_frame', 'add_to_path_and_install_extensions_frame', 'coming_soon_os_frame'
+        'welcome_frame', 'language_select_frame', 'os_asker_frame', 'c_windows_frame', 'coming_soon_frame',
+        'download_vscode_for_windows_frame',
+        'download_msys2_for_windows_frame', 'install_mingw64_frame', 'add_to_path_and_install_extensions_frame',
+        'coming_soon_os_frame'
     ]
     for name in frame_names:
         frames[name] = ctk.CTkFrame(master=app)
     return frames
 
+
 # Creating Frames.
 frames = create_frames(app)
 install_mingw64_frame = ctk.CTkFrame(master=frames['install_mingw64_frame'], fg_color='transparent')
+
 
 # ***************************** <defining all methods> *****************************
 def decision_maker(language, system_name):  # method to take decision
@@ -53,10 +58,11 @@ def decision_maker(language, system_name):  # method to take decision
     if frame_key in frames:
         frames[frame_key].pack(fill="both", expand=True)
 
-def download_file(url, filename='', progress_callback=None):    # Downloader function
-    try:                                # parameters file_url and filename (optional)
+
+def download_file(url, filename='', progress_callback=None):  # Downloader function
+    try:  # parameters file_url and filename (optional)
         if not filename:
-            filename = url[url.rfind('/')+1:]
+            filename = url[url.rfind('/') + 1:]
 
         global downloaded_file_path
         downloaded_file_path = filename
@@ -78,12 +84,14 @@ def download_file(url, filename='', progress_callback=None):    # Downloader fun
         print(e)
         return None
 
+
 # Progress callback function
 def update_progress_bar(progress_bar, percentage_label, current, total):
     progress = (current / total) * 100
     progress_bar['value'] = progress
     percentage_label.configure(text=f'{progress:.2f}%')
     app.update_idletasks()
+
 
 # Function to run the downloaded file
 def install_vscode():
@@ -94,10 +102,12 @@ def install_vscode():
         except Exception as e:
             messagebox.showerror("Error", f"Failed to install VSCode: {e}")
 
+
 # Function to show the MSYS2 download page
 def show_download_msys2_page():
     frames['download_vscode_for_windows_frame'].pack_forget()
     frames['download_msys2_for_windows_frame'].pack(fill="both", expand=True)
+
 
 def install_msys2():
     def show_install_mingw64_frame():
@@ -108,10 +118,10 @@ def install_msys2():
         subprocess.run([downloaded_file_path])
         msys2_install_button.configure(text='Goto Next Step', command=show_install_mingw64_frame)
 
+
 # ***************************** <defining main method> *****************************
 
 def main():
-
     # ***************************** <defining all frames> *****************************
     frames['welcome_frame'].pack(fill="both", expand=True)
 
@@ -147,13 +157,16 @@ def main():
                                 font=('Poppins Semibold', 25))
     window_title.grid(row=0, column=0, columnspan=4, pady=50)
 
-    c_and_cpp_btn = ctk.CTkButton(master=frames['language_select_frame'], text='C/C++', width=140, height=45, corner_radius=7,
+    c_and_cpp_btn = ctk.CTkButton(master=frames['language_select_frame'], text='C/C++', width=140, height=45,
+                                  corner_radius=7,
                                   font=('Poppins', 17), command=c_and_cpp_btn_click)
     java_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Java', width=140, height=45, corner_radius=7,
                              font=('Poppins', 17), command=show_coming_soon_frame)
-    python_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Python', width=140, height=45, corner_radius=7,
+    python_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Python', width=140, height=45,
+                               corner_radius=7,
                                font=('Poppins', 17), command=show_coming_soon_frame)
-    others_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Others', width=140, height=45, corner_radius=7,
+    others_btn = ctk.CTkButton(master=frames['language_select_frame'], text='Others', width=140, height=45,
+                               corner_radius=7,
                                font=('Poppins', 17), command=show_coming_soon_frame)
 
     c_and_cpp_btn.grid(row=1, column=1, pady=20)
@@ -191,7 +204,8 @@ def main():
                                font=('Poppins Semibold', 25))  # Top title text
     basic_label.grid(row=0, column=0, columnspan=3, pady=95)  # Span across 3 columns
 
-    windows_button = ctk.CTkButton(master=frames['os_asker_frame'], text='Windows', width=140, height=45, corner_radius=7,
+    windows_button = ctk.CTkButton(master=frames['os_asker_frame'], text='Windows', width=140, height=45,
+                                   corner_radius=7,
                                    font=('Poppins', 17), command=windows_button_click)
     macos_button = ctk.CTkButton(master=frames['os_asker_frame'], text='macOS', width=140, height=45, corner_radius=7,
                                  font=('Poppins', 17), command=show_coming_soon_os_frame)
@@ -239,7 +253,8 @@ def main():
 
     def start_download_vscode():
         download_button.configure(state="disabled")
-        download_file(vscode_windows_url, progress_callback=lambda cur, tot: update_progress_bar(progress_bar, percentage_label, cur, tot))
+        download_file(vscode_windows_url,
+                      progress_callback=lambda cur, tot: update_progress_bar(progress_bar, percentage_label, cur, tot))
         download_button.configure(state="normal")
         download_button.pack_forget()  # Hide download button
         install_button.pack(pady=20)  # Show install button
@@ -249,7 +264,8 @@ def main():
                                    height=50, corner_radius=7, font=('Poppins', 18), command=install_vscode)
     install_button.pack_forget()
 
-    download_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Download VSCode', width=200,
+    download_button = ctk.CTkButton(master=frames['download_vscode_for_windows_frame'], text='Download VSCode',
+                                    width=200,
                                     height=50, corner_radius=7, font=('Poppins', 18), command=start_download_vscode)
     download_button.pack(pady=20)
 
@@ -262,7 +278,9 @@ def main():
     # Function to download MSYS2
     def download_msys2():
         msys2_download_button.configure(state="disabled")
-        download_file(msys2_windows_url, progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label, cur, tot))
+        download_file(msys2_windows_url,
+                      progress_callback=lambda cur, tot: update_progress_bar(msys2_progress_bar, msys2_percentage_label,
+                                                                             cur, tot))
         msys2_download_button.configure(state="normal")
         msys2_download_button.pack_forget()
         msys2_install_button.pack(pady=20)
@@ -272,15 +290,18 @@ def main():
     msys2_progress_bar = ttk.Progressbar(frames['download_msys2_for_windows_frame'], length=300, mode='determinate')
     msys2_progress_bar.pack(pady=20)
 
-    msys2_percentage_label = ctk.CTkLabel(master=frames['download_msys2_for_windows_frame'], text="0%", font=('Poppins', 14))
+    msys2_percentage_label = ctk.CTkLabel(master=frames['download_msys2_for_windows_frame'], text="0%",
+                                          font=('Poppins', 14))
     msys2_percentage_label.pack()
 
-    msys2_download_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Download MSYS2', width=200,
-                                         height=50, corner_radius=7, font=('Poppins', 18), command=download_msys2)
+    msys2_download_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Download MSYS2',
+                                          width=200,
+                                          height=50, corner_radius=7, font=('Poppins', 18), command=download_msys2)
     msys2_download_button.pack(pady=20)
 
-    msys2_install_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Install MSYS2', width=200,
-                                        height=50, corner_radius=7, font=('Poppins', 18), command=install_msys2)
+    msys2_install_button = ctk.CTkButton(master=frames['download_msys2_for_windows_frame'], text='Install MSYS2',
+                                         width=200,
+                                         height=50, corner_radius=7, font=('Poppins', 18), command=install_msys2)
     msys2_install_button.pack_forget()
 
     # ***************************** <install mingw64 frame> *****************************
@@ -354,13 +375,46 @@ def main():
         )
         add_to_path_btn.configure(text="Path Added", state="normal")
 
+    def extension_update_progress(current, total):
+        progress = (current / total) * 100
+        extension_progress_bar['value'] = progress
+        extension_percentage_label.configure(text=f'{progress:.2f}%')
+        app.update_idletasks()
+
+    # Extension Installation Process
+    def install_extension(ext, label):
+        try:
+            user_profile = os.environ.get("USERPROFILE")
+            code_path = os.path.join(user_profile, "AppData", "Local", "Programs", "Microsoft VS Code", "bin",
+                                     "code.cmd")
+            result = subprocess.run([code_path, "--install-extension", ext], check=True, capture_output=True, text=True)
+            if result.returncode == 0:
+                label.configure(text=ext + " ✅")
+            else:
+                label.configure(text=ext + " ❌")
+        except subprocess.CalledProcessError as e:
+            label.configure(text=ext + " ❌")
+        except FileNotFoundError:
+            label.configure(text=ext + " ❌ (code.cmd not found)")
+
+    def install_extensions():
+        total = len(extension_list)
+        for i, ext in enumerate(extension_list):
+            install_extension(ext, extension_labels[i])
+            extension_update_progress(i + 1, total)
+        install_button.configure(state="normal")
+
+    def start_installation():
+        install_button.configure(state="disabled")
+        threading.Thread(target=install_extensions).start()
+
     page_label = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'],
                               text="Let's do the next things",
                               font=('Poppins', 25))
     page_label.pack(pady=20)
     page_label_2 = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'],
-                              text="1. Click the following button to the path.",
-                              font=('Poppins', 15))
+                                text="1. Click the following button to the path.",
+                                font=('Poppins', 15))
     page_label_2.pack(pady=15)
 
     global add_to_path_btn
@@ -371,17 +425,40 @@ def main():
                                                                      add_to_path_btn))
     add_to_path_btn.pack(pady=15)
 
+    # Create a label for each extension
+    extension_labels = []
+    for ext in extension_list:
+        label = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'], text=ext, font=('Poppins', 14))
+        label.pack(pady=5)
+        extension_labels.append(label)
+
+    # Extension installation progress bar and percentage label
+    extension_progress_bar = ttk.Progressbar(frames['add_to_path_and_install_extensions_frame'], length=400,
+                                             mode='determinate')
+    extension_progress_bar.pack(pady=20)
+
+    extension_percentage_label = ctk.CTkLabel(master=frames['add_to_path_and_install_extensions_frame'], text="0%",
+                                              font=('Poppins', 14))
+    extension_percentage_label.pack()
+
+    vsocde_extension_install_button = ctk.CTkButton(master=frames['add_to_path_and_install_extensions_frame'],
+                                                    text="Install Extensions", width=200, height=50,
+                                                    corner_radius=7, font=('Poppins', 18), command=start_installation)
+    vsocde_extension_install_button.pack(pady=20)
+
     # Return Back Frame
     def return_back():
         for frame in frames.values():
             frame.pack_forget()
         frames['language_select_frame'].pack(fill="both", expand=True)
 
-    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_frame'], text="Coming Soon", font=('Poppins Semibold', 25))
+    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_frame'], text="Coming Soon",
+                                     font=('Poppins Semibold', 25))
     coming_soon_label.pack(pady=50)
 
-    return_button = ctk.CTkButton(master=frames['coming_soon_frame'], text='Return Back', width=180, height=45, corner_radius=7,
-                                          font=('Poppins', 17), command=return_back)
+    return_button = ctk.CTkButton(master=frames['coming_soon_frame'], text='Return Back', width=180, height=45,
+                                  corner_radius=7,
+                                  font=('Poppins', 17), command=return_back)
     return_button.pack(pady=20)
 
     # Return Back Frame Language
@@ -390,12 +467,15 @@ def main():
             frame.pack_forget()
         frames['os_asker_frame'].pack(fill="both", expand=True)
 
-    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_os_frame'], text="Coming Soon", font=('Poppins Semibold', 25))
+    coming_soon_label = ctk.CTkLabel(master=frames['coming_soon_os_frame'], text="Coming Soon",
+                                     font=('Poppins Semibold', 25))
     coming_soon_label.pack(pady=50)
 
-    return_button = ctk.CTkButton(master=frames['coming_soon_os_frame'], text='Return Back', width=180, height=45, corner_radius=7,
-                                          font=('Poppins', 17), command=return_back_os)
+    return_button = ctk.CTkButton(master=frames['coming_soon_os_frame'], text='Return Back', width=180, height=45,
+                                  corner_radius=7,
+                                  font=('Poppins', 17), command=return_back_os)
     return_button.pack(pady=20)
+
 
 if __name__ == "__main__":
     main()
